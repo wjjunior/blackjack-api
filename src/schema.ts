@@ -1,6 +1,11 @@
 import { gql } from "apollo-server-express";
 
 export const typeDefs = gql`
+  enum Drawer {
+    dealer
+    user
+  }
+
   type Query {
     hello: String # A simple query field
   }
@@ -20,7 +25,17 @@ export const typeDefs = gql`
     gameCards: GameCards
   }
 
+  type DrawCardsResponse {
+    id: String
+    drawnCards: [Card]
+  }
+
   type Mutation {
     registerGameStart: Game
+    drawCards(
+      deckId: String!
+      numCards: Int!
+      drawer: Drawer!
+    ): DrawCardsResponse
   }
 `;

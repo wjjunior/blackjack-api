@@ -32,4 +32,31 @@ export class SQLiteGameRepository implements GameRepository {
       gameData,
     ]);
   }
+
+  async getGameById(id: string): Promise<GameData | null> {
+    const db = await this.dbPromise;
+
+    const query = "SELECT game_data FROM games WHERE id = ?";
+    const params = [id];
+
+    const row = await db.get(query, params);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id,
+      gameData: row.game_data,
+    };
+  }
+
+  async updateGame(id: string, gameData: string): Promise<void> {
+    const db = await this.dbPromise;
+
+    const query = "UPDATE games SET game_data = ? WHERE id = ?";
+    const params = [gameData, id];
+
+    await db.run(query, params);
+  }
 }
