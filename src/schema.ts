@@ -37,5 +37,6 @@ export const typeDefs = gql`
       numCards: Int!
       drawer: Drawer!
     ): DrawCardsResponse
+    restartGame(deckId: String!): Game
   }
 `;

@@ -71,6 +71,30 @@ const resolvers = (
 
       return { id: deckId, drawnCards };
     },
+
+    restartGame: async (_parent: unknown, args: { deckId: string }) => {
+      const { deckId } = args;
+
+      const gameData = await gameRepository.getGameById(deckId);
+      if (!gameData) {
+        throw new Error("Game not found");
+      }
+
+      const newDealerCard = cardService.getRandomCard();
+      const newUserCards = [
+        cardService.getRandomCard(),
+        cardService.getRandomCard(),
+      ];
+
+      const newGameData = {
+        dealerCards: [newDealerCard],
+        userCards: newUserCards,
+      };
+
+      await gameRepository.updateGame(deckId, JSON.stringify(newGameData));
+
+      return { id: deckId, gameCards: newGameData };
+    },
   },
 });
 
