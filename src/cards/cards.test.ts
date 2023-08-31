@@ -1,8 +1,9 @@
-import { CardServiceImpl } from "./cards"; // Import the correct path
+import { CardServiceImpl } from "./cards";
 
 const mockDeckCards = [
   { value: "Ace", suit: "Spades" },
   { value: "2", suit: "Hearts" },
+  { value: "Ace", suit: "Hearts" },
 ];
 
 const makeSut = (deckCards = mockDeckCards) => {
@@ -31,6 +32,33 @@ describe("CardServiceImpl", () => {
     const cardService = makeSut([]);
 
     const randomCard = cardService.getRandomCard();
+
+    expect(randomCard).toBeUndefined();
+  });
+
+  it("should return a non excluded card", () => {
+    const mockExcludedCards = [
+      { value: "Ace", suit: "Hearts" },
+      { value: "2", suit: "Hearts" },
+    ];
+    const cardService = makeSut();
+    const randomCard = cardService.getRandomCardFromDeck(mockExcludedCards);
+
+    expect(randomCard).toBeDefined();
+    expect(mockExcludedCards).not.toContain(randomCard);
+  });
+
+  it("should return undefined when no cards are available", () => {
+    const cardService = makeSut([]);
+    const randomCard = cardService.getRandomCardFromDeck([]);
+
+    expect(randomCard).toBeUndefined();
+  });
+
+  it("should return undefined when all cards are excluded", () => {
+    const mockExcludedCards = [...mockDeckCards];
+    const cardService = makeSut([]);
+    const randomCard = cardService.getRandomCardFromDeck(mockExcludedCards);
 
     expect(randomCard).toBeUndefined();
   });
