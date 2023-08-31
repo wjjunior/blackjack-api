@@ -1,6 +1,7 @@
 import sqlite3 from "sqlite3";
 import { Database, open } from "sqlite";
 import { GameRepository } from "./db.interfaces";
+import { GameData } from "./types";
 
 export class SQLiteGameRepository implements GameRepository {
   private dbPromise: Promise<Database>;
@@ -23,8 +24,12 @@ export class SQLiteGameRepository implements GameRepository {
       `);
   }
 
-  async insertGame(gameData: string): Promise<void> {
+  async insertGame(game: GameData): Promise<void> {
+    const { id, gameData } = game;
     const db = await this.dbPromise;
-    await db.run("INSERT INTO games (game_data) VALUES (?)", gameData);
+    await db.run("INSERT INTO games (id, game_data) VALUES (?, ?)", [
+      id,
+      gameData,
+    ]);
   }
 }

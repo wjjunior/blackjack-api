@@ -20,7 +20,10 @@ const resolvers = (
         userCards,
       };
 
-      await gameRepository.insertGame(JSON.stringify(gameData));
+      await gameRepository.insertGame({
+        id: gameId,
+        gameData: JSON.stringify(gameData),
+      });
 
       return { id: gameId, gameCards: gameData };
     },

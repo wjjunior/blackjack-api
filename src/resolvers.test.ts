@@ -37,9 +37,10 @@ describe("registerGameStart Mutation Resolver", () => {
       },
     });
 
-    expect(mockGameRepository.insertGame).toHaveBeenCalledWith(
-      JSON.stringify(result.gameCards),
-    );
+    expect(mockGameRepository.insertGame).toHaveBeenCalledWith({
+      id: expect.any(String),
+      gameData: JSON.stringify(result.gameCards),
+    });
     expect(mockCardService.getRandomCard).toHaveBeenCalledTimes(3);
   });
 });
