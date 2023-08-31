@@ -9,9 +9,9 @@ let mockCardService: jest.Mocked<CardService>;
 
 const makeSut = () => {
   const {
-    Mutation: { drawCards, registerGameStart },
+    Mutation: { drawCards, registerGameStart, restartGame },
   } = resolvers(mockGameRepository, mockCardService);
-  return { drawCards, registerGameStart };
+  return { drawCards, registerGameStart, restartGame };
 };
 
 describe("registerGameStart Mutation Resolver", () => {
@@ -146,6 +146,50 @@ describe("registerGameStart Mutation Resolver", () => {
       }),
     ).rejects.toThrow("Not enough cards left in the deck");
     expect(mockCardService.getRandomCardFromDeck).toHaveBeenCalled();
+    expect(mockGameRepository.updateGame).not.toHaveBeenCalled();
+  });
+
+  it("should restart the game correctly", async () => {
+    const mockGameData = { dealerCards: [], userCards: [] };
+    const mockNewDealerCard = { value: "Ace", suit: "Hearts" };
+    const mockNewUserCards = [
+      { value: "2", suit: "Diamonds" },
+      { value: "10", suit: "Clubs" },
+    ];
+    const expectedNewGameData = {
+      dealerCards: [mockNewDealerCard],
+      userCards: mockNewUserCards,
+    };
+
+    mockGameRepository.getGameById.mockResolvedValue({
+      id: mockDeckId,
+      gameData: JSON.stringify(mockGameData),
+    });
+    mockCardService.getRandomCard.mockReturnValueOnce(mockNewDealerCard);
+    mockCardService.getRandomCard.mockReturnValueOnce(mockNewUserCards[0]);
+    mockCardService.getRandomCard.mockReturnValueOnce(mockNewUserCards[1]);
+
+    const { restartGame } = makeSut();
+
+    const result = await restartGame(null, { deckId: mockDeckId });
+
+    expect(result.id).toBe(mockDeckId);
+    expect(result.gameCards).toEqual(expectedNewGameData);
+    expect(mockGameRepository.updateGame).toHaveBeenCalledWith(
+      mockDeckId,
+      JSON.stringify(expectedNewGameData),
+    );
+  });
+
+  it("should throw error when game is not found", async () => {
+    mockGameRepository.getGameById.mockResolvedValue(null);
+
+    const { restartGame } = makeSut();
+
+    await expect(
+      restartGame(null, { deckId: "invalid-deck-id" }),
+    ).rejects.toThrow("Game not found");
+    expect(mockCardService.getRandomCard).not.toHaveBeenCalled();
     expect(mockGameRepository.updateGame).not.toHaveBeenCalled();
   });
 });
